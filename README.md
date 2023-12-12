@@ -8,7 +8,7 @@ Input Image URL (From Gyazo or anywhere on the web)
 
 ## Usage
 - Install customtkinter, packaging in your IDE
-- Create a file called api_key.txt in the main .py file directory and paste your [OpenAI API Key] (https://platform.openai.com/api-keys) as the first line
+- Create a file called api_key.txt in the main .py file directory and paste your [OpenAI API Key](https://platform.openai.com/api-keys) as the first line
 - **RUN!**
 
 ## Features to be implemented
