@@ -37,8 +37,8 @@ def generate_output(prompt, image_url, max_tokens):
 
 # Grabs OpenAI api key from a file
 def get_api_key():
-    key_file = open('api_key.txt', 'r')
-    return key_file.readline()
+    with open('api_key.txt', 'r') as key_file:  # Actually closes the file now
+        return key_file.readline()
 
 
 # Changes the token text to the value of the sliderf
