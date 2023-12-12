@@ -12,5 +12,5 @@ Input Image URL (From Gyazo or anywhere on the web)
 - **RUN!**
 
 ## Features to be implemented
-Temperature Control Slider (currently set to 0.3 by default)
-Drag and Drop Image Uploads
+- Temperature Control Slider (currently set to 0.3 by default)
+- Drag and Drop Image Uploads
