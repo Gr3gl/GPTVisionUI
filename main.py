@@ -8,10 +8,12 @@ global token_slider
 global gpt_textbox
 global prompt_entry
 global image_entry
+global temperature_label
+global temperature_slider
 
 
 # Generates an AI output from an image and prompt using GPT Vision
-def generate_output(prompt, image_url, max_tokens):
+def generate_output(prompt, image_url, max_tokens, temperature):
     response = client.chat.completions.create(
         model="gpt-4-vision-preview",
         messages=[
@@ -29,7 +31,7 @@ def generate_output(prompt, image_url, max_tokens):
             }
         ],
         max_tokens=max_tokens,
-        temperature=0.3,  # TODO Make this editable later
+        temperature=temperature,
     )
     print(response.choices[0].message.content)
     return response.choices[0].message.content
@@ -41,10 +43,16 @@ def get_api_key():
         return key_file.readline()
 
 
-# Changes the token text to the value of the sliderf
+# Changes the token text to the value of the slider
 def change_token_text(slider_value):
-    token_string = "Tokens: " + str(int(slider_value))
+    token_string = "Tokens: {}".format(int(slider_value))
     token_label.configure(text=token_string)
+
+
+# Changes the temperature text to the value of the slider
+def change_temperature_text(slider_value):
+    temperature_string = "Temperature: {}".format(round(slider_value, 2))
+    temperature_label.configure(text=temperature_string)
 
 
 # Calls a prompt generation and edits the gpt_textbox
@@ -52,7 +60,8 @@ def generate_pressed():
     prompt = prompt_entry.get("0.0", "end")
     image_url = image_entry.get()
     tokens = int(token_slider.get())
-    result = generate_output(prompt, image_url, tokens)
+    temperature = round(temperature_slider.get(), 2)
+    result = generate_output(prompt, image_url, tokens, temperature)
 
     # textbox shit
     gpt_textbox.configure(state="normal")
@@ -68,7 +77,7 @@ if __name__ == '__main__':
     ctk.set_appearance_mode("System")
     ctk.set_default_color_theme("blue")
     window = ctk.CTk()
-    window.geometry("720x600")
+    window.geometry("720x700")
     window.title("GPT-4-Vision GUI")
 
     # Frame
@@ -94,6 +103,14 @@ if __name__ == '__main__':
     token_slider = ctk.CTkSlider(master=frame, from_=30, to=2000, number_of_steps=500, width=680, command=change_token_text)
     token_slider.pack(anchor="w", padx=10, pady=6)
     token_slider.set(100)
+
+    # Temperature Slider
+    temperature_label = ctk.CTkLabel(master=frame, text="Temperature: 0.3")
+    temperature_label.pack(anchor="w", padx=10, pady=6)
+
+    temperature_slider = ctk.CTkSlider(master=frame, from_=0, to=1, number_of_steps=100, width=680, command=change_temperature_text)
+    temperature_slider.pack(anchor="w", padx=10, pady=6)
+    temperature_slider.set(0.3)
 
     generate_button = ctk.CTkButton(master=frame, text="Generate", command=generate_pressed)
     generate_button.pack(anchor="w", padx=10, pady=8)
