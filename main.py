@@ -1,7 +1,6 @@
 import openai as openai
 import customtkinter as ctk
 
-
 # Globals
 global token_label
 global token_slider
@@ -39,8 +38,15 @@ def generate_output(prompt, image_url, max_tokens, temperature):
 
 # Grabs OpenAI api key from a file
 def get_api_key():
-    with open('api_key.txt', 'r') as key_file:  # Actually closes the file now
-        return key_file.readline()
+    with open('api_key.txt', 'a+') as key_file:  # Actually closes the file now
+        key_file.seek(0) # seeks to start of file
+        file_content = key_file.readline()
+        if file_content != "": # Basic implementation of api_key guided setup
+            return file_content
+        else:
+            api_input = input("Enter your api key: ") #TODO make this its own window
+            key_file.write(api_input)
+            return api_input
 
 
 # Changes the token text to the value of the slider
@@ -72,6 +78,7 @@ def generate_pressed():
 
 if __name__ == '__main__':
     client = openai.OpenAI(api_key=get_api_key())
+    icon = "GPTVISION.ico"
 
     # Window
     ctk.set_appearance_mode("System")
@@ -79,6 +86,7 @@ if __name__ == '__main__':
     window = ctk.CTk()
     window.geometry("720x700")
     window.title("GPT-4-Vision GUI")
+    window.iconbitmap(icon)
 
     # Frame
     frame = ctk.CTkFrame(master=window)
