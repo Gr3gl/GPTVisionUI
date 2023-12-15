@@ -1,9 +1,12 @@
 # GPTVisionUI
 Python CTK UI for using GPT Vision with Image URLs (For now)
 
+![Screenshot of GPTVisionUI from 12/12/23](https://i.gyazo.com/fe5f3d1d8135a731d913fbe6472fc152.png)
+
 ## Features
-Editable Tokens Amount
-Input Image URL (From Gyazo or anywhere on the web)
+- Editable Tokens Amount
+- Temperature Control Slider (currently set to 0.3 by default)
+- Input Image URL (From Gyazo or anywhere on the web)
 
 
 ## Usage
@@ -12,5 +15,7 @@ Input Image URL (From Gyazo or anywhere on the web)
 - **RUN!**
 
 ## Features to be implemented
-- Temperature Control Slider (currently set to 0.3 by default)
 - Drag and Drop Image Uploads
+- Wizard api_key.txt setup
+- exe Release
+- Program Icon
