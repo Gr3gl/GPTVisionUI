@@ -35,6 +35,10 @@ def generate_output(prompt, image_url, max_tokens, temperature):
     print(response.choices[0].message.content)
     return response.choices[0].message.content
 
+# Opens a window which has a textbox for the user to input their API Key
+def open_api_window():
+    dialog = ctk.CTkInputDialog(text="Please enter your OpenAI API Key \n(https://platform.openai.com/api-keys)", title="API Input")
+    return dialog.get_input()
 
 # Grabs OpenAI api key from a file
 def get_api_key():
@@ -44,7 +48,7 @@ def get_api_key():
         if file_content != "": # Basic implementation of api_key guided setup
             return file_content
         else:
-            api_input = input("Enter your api key: ") #TODO make this its own window
+            api_input = open_api_window()
             key_file.write(api_input)
             return api_input
 
@@ -77,19 +81,23 @@ def generate_pressed():
 
 
 if __name__ == '__main__':
-    client = openai.OpenAI(api_key=get_api_key())
+    first_run = True
     icon = "GPTVISION.ico"
+
+    root = ctk.CTk()
+    if first_run is True:
+        client = openai.OpenAI(api_key=get_api_key())
+        first_run = False
 
     # Window
     ctk.set_appearance_mode("System")
     ctk.set_default_color_theme("blue")
-    window = ctk.CTk()
-    window.geometry("720x700")
-    window.title("GPT-4-Vision GUI")
-    window.iconbitmap(icon)
+    root.geometry("720x700")
+    root.title("GPT-4-Vision GUI")
+    root.iconbitmap(icon)
 
     # Frame
-    frame = ctk.CTkFrame(master=window)
+    frame = ctk.CTkFrame(master=root)
     frame.pack(pady=20, padx=20, fill="both", expand=True)
 
     # Labels and entries
@@ -126,4 +134,4 @@ if __name__ == '__main__':
     gpt_textbox = ctk.CTkTextbox(master=frame, width=680, height=300, state="disabled")
     gpt_textbox.pack(anchor="w", padx=10, pady=9)
 
-    window.mainloop()
+    root.mainloop()
