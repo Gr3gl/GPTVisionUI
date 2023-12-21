@@ -13,15 +13,21 @@ global temperature_label
 global temperature_slider
 global base64_checkbox
 global output_list
+global image_label
 
+
+# Function to encode the image (From OpenAI)
+def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
 
 # Generates an AI output from an image and prompt using GPT Vision
-def generate_output(prompt, image_url, max_tokens, temperature):
+def generate_output(prompt, image_source, max_tokens, temperature):
     if base64_checkbox.get() == 1:
-        base64_image = "temp"
-        final_url = f"data:image/jpeg;base64,{base64_image}"
+        base64_image = encode_image(image_source)
+        final_source = f"data:image/jpeg;base64,{base64_image}"
     else:
-        final_url = image_url
+        final_source = image_source
 
     # TODO add checks if image link is selected, if there is a prompt
 
@@ -35,7 +41,7 @@ def generate_output(prompt, image_url, max_tokens, temperature):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": final_url,
+                            "url": final_source,
                         },
                     },
                 ],
@@ -83,9 +89,11 @@ def change_temperature_text(slider_value):
 # Event which occurs when the base64 checkbox is checked
 def base_64_checked():
     if base64_checkbox.get() == 1:
-        image_entry.configure(state="disabled", fg_color="#202020", text_color="grey")
+        image_entry.configure(state="normal", fg_color="#202020", text_color="#338dd4") # I'll keep the state on normal instead of disabled incase you want to input a filepath
+        image_label.configure(text="Enter Image Filepath or Drag and Drop Image:")
     else:
         image_entry.configure(state="normal", fg_color="#343738", text_color="#e6e6e6") #e6e6e6 is my best guess
+        image_label.configure(text="Enter Image URL:")
 
 # Calls a prompt generation and edits the gpt_textbox
 def generate_pressed():
@@ -106,12 +114,17 @@ def drop(event):
     files = event.data
     if files:
         files = files.split()
-        file = files[0]
+        file = files[0] # gets the filepath of the first file dropped (if multiple files are dropped)
         print(f"File dropped: {file}")
 
         # Sets the filepath in the image_entry URL
         image_entry.delete(0, "end")
         image_entry.insert(0, file)
+
+        # Checks the base64 box if it is not checked already
+        if base64_checkbox.get() == 0:
+            base64_checkbox.select()
+            base_64_checked()
 # Writes the GPT Generated Outputs to a file named output_log.txt
 def write_output():
     with open('output_log.txt', 'w') as output_file:
@@ -121,7 +134,6 @@ def write_output():
 
 
 if __name__ == '__main__':
-    # TODO when drop, set the entry text to the file name
     # Definitions
     output_list = []
 
@@ -152,7 +164,7 @@ if __name__ == '__main__':
 
     # Base 64 Checkbox
     check_var = ctk.StringVar(value="on")
-    base64_checkbox = ctk.CTkCheckBox(master=frame, text="Base64 Local Image Upload (Drag and Drop)", command=base_64_checked, variable=check_var, onvalue=1, offvalue=0)
+    base64_checkbox = ctk.CTkCheckBox(master=frame, text="Base64 Local Image Upload", command=base_64_checked, variable=check_var, onvalue=1, offvalue=0)
     base64_checkbox.pack(anchor="w", padx=10, pady=4)
 
     image_label = ctk.CTkLabel(master=frame, text="Enter Image URL:")
