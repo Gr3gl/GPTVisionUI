@@ -1,5 +1,6 @@
 import openai as openai
 import customtkinter as ctk
+import base64
 
 # Globals
 global token_label
@@ -9,10 +10,19 @@ global prompt_entry
 global image_entry
 global temperature_label
 global temperature_slider
+global base64_checkbox
 
 
 # Generates an AI output from an image and prompt using GPT Vision
 def generate_output(prompt, image_url, max_tokens, temperature):
+    if base64_checkbox.get() == 1:
+        base64_image = "temp"
+        final_url = f"data:image/jpeg;base64,{base64_image}"
+    else:
+        final_url = image_url
+
+    # TODO add checks if image link is selected, if there is a prompt
+
     response = client.chat.completions.create(
         model="gpt-4-vision-preview",
         messages=[
@@ -23,7 +33,7 @@ def generate_output(prompt, image_url, max_tokens, temperature):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": image_url,
+                            "url": final_url,
                         },
                     },
                 ],
@@ -64,6 +74,11 @@ def change_temperature_text(slider_value):
     temperature_string = "Temperature: {}".format(round(slider_value, 2))
     temperature_label.configure(text=temperature_string)
 
+def base_64_checked():
+    if base64_checkbox.get() == 1:
+        image_entry.configure(state="disabled")
+    else:
+        image_entry.configure(state="normal")
 
 # Calls a prompt generation and edits the gpt_textbox
 def generate_pressed():
@@ -107,8 +122,13 @@ if __name__ == '__main__':
     prompt_entry = ctk.CTkTextbox(master=frame, width=680, height=70)
     prompt_entry.pack(anchor="w", padx=10)
 
+    # Base 64 Checkbox
+    check_var = ctk.StringVar(value="on")
+    base64_checkbox = ctk.CTkCheckBox(master=frame, text="Base64 Local Image Upload (Drag and Drop)", command=base_64_checked, variable=check_var, onvalue=1, offvalue=0)
+    base64_checkbox.pack(anchor="w", padx=10, pady=4)
+
     image_label = ctk.CTkLabel(master=frame, text="Enter Image URL:")
-    image_label.pack(anchor="w", padx=10, pady=6)
+    image_label.pack(anchor="w", padx=10, pady=2)
 
     image_entry = ctk.CTkEntry(master=frame, width=680)
     image_entry.pack(anchor="w", padx=10)
