@@ -1,6 +1,7 @@
 import openai as openai
 import customtkinter as ctk
 import base64
+from tkinterdnd2 import DND_FILES, TkinterDnD
 
 # Globals
 global token_label
@@ -11,6 +12,7 @@ global image_entry
 global temperature_label
 global temperature_slider
 global base64_checkbox
+global output_list
 
 
 # Generates an AI output from an image and prompt using GPT Vision
@@ -42,8 +44,10 @@ def generate_output(prompt, image_url, max_tokens, temperature):
         max_tokens=max_tokens,
         temperature=temperature,
     )
-    print(response.choices[0].message.content)
-    return response.choices[0].message.content
+    gpt_output = response.choices[0].message.content
+    print(gpt_output)
+    output_list.append(gpt_output)
+    return gpt_output
 
 # Opens a window which has a textbox for the user to input their API Key
 def open_api_window():
@@ -56,10 +60,12 @@ def get_api_key():
         key_file.seek(0) # seeks to start of file
         file_content = key_file.readline()
         if file_content != "": # Basic implementation of api_key guided setup
+            print("Successfully Read API Key")
             return file_content
         else:
             api_input = open_api_window()
             key_file.write(api_input)
+            print("Wrote API Key to file api_key.txt")
             return api_input
 
 
@@ -74,11 +80,12 @@ def change_temperature_text(slider_value):
     temperature_string = "Temperature: {}".format(round(slider_value, 2))
     temperature_label.configure(text=temperature_string)
 
+# Event which occurs when the base64 checkbox is checked
 def base_64_checked():
     if base64_checkbox.get() == 1:
-        image_entry.configure(state="disabled")
+        image_entry.configure(state="disabled", fg_color="#202020", text_color="grey")
     else:
-        image_entry.configure(state="normal")
+        image_entry.configure(state="normal", fg_color="#343738", text_color="#e6e6e6") #e6e6e6 is my best guess
 
 # Calls a prompt generation and edits the gpt_textbox
 def generate_pressed():
@@ -94,22 +101,43 @@ def generate_pressed():
     gpt_textbox.insert("0.0", result)
     gpt_textbox.configure(state="disabled")
 
+# Event which is called when a file is drag and dropped onto the window
+def drop(event):
+    files = event.data
+    if files:
+        files = files.split()
+        file = files[0]
+        print(f"File dropped: {file}")
+
+        # Sets the filepath in the image_entry URL
+        image_entry.delete(0, "end")
+        image_entry.insert(0, file)
+# Writes the GPT Generated Outputs to a file named output_log.txt
+def write_output():
+    with open('output_log.txt', 'w') as output_file:
+        for output in output_list:
+            output_file.write(output + '\n')
+
+
 
 if __name__ == '__main__':
-    first_run = True
-    icon = "GPTVISION.ico"
-
-    root = ctk.CTk()
-    if first_run is True:
-        client = openai.OpenAI(api_key=get_api_key())
-        first_run = False
+    # TODO when drop, set the entry text to the file name
+    # Definitions
+    output_list = []
 
     # Window
+    icon = "GPTVISION.ico"
+    root = TkinterDnD.Tk() # this change causes the title bar to become windows default color again (Maybe change in version 1.01)
     ctk.set_appearance_mode("System")
     ctk.set_default_color_theme("blue")
     root.geometry("720x700")
     root.title("GPT-4-Vision GUI")
+    root.configure(background='#252525')
     root.iconbitmap(icon)
+    root.resizable(False, False)  # Add resizability with a UI overhaul down the line if this picks up any traction at all (it wont)
+    # These allow the window to register files that have been dropped on it using tkinterdnd2
+    root.drop_target_register(DND_FILES)
+    root.dnd_bind('<<Drop>>', drop)
 
     # Frame
     frame = ctk.CTkFrame(master=root)
@@ -154,4 +182,9 @@ if __name__ == '__main__':
     gpt_textbox = ctk.CTkTextbox(master=frame, width=680, height=300, state="disabled")
     gpt_textbox.pack(anchor="w", padx=10, pady=9)
 
+    client = openai.OpenAI(api_key=get_api_key())
+
     root.mainloop()
+
+    # Write the GPT Outputs to a file output_log.txt
+    write_output()
