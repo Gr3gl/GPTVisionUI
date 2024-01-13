@@ -1,9 +1,9 @@
-import openai as openai
+from openai import OpenAI
 import customtkinter as ctk
-import base64
+from base64 import b64encode
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-# Globals
+# UI Globals
 global token_label
 global token_slider
 global gpt_textbox
@@ -18,8 +18,9 @@ global image_label
 
 # Function to encode the image (From OpenAI)
 def encode_image(image_path):
-  with open(image_path, "rb") as image_file:
-    return base64.b64encode(image_file.read()).decode('utf-8')
+    with open(image_path, "rb") as image_file:
+        return b64encode(image_file.read()).decode('utf-8')
+
 
 # Generates an AI output from an image and prompt using GPT Vision
 def generate_output(prompt, image_source, max_tokens, temperature):
@@ -55,17 +56,19 @@ def generate_output(prompt, image_source, max_tokens, temperature):
     output_list.append(gpt_output)
     return gpt_output
 
+
 # Opens a window which has a textbox for the user to input their API Key
 def open_api_window():
     dialog = ctk.CTkInputDialog(text="Please enter your OpenAI API Key \n(https://platform.openai.com/api-keys)", title="API Input")
     return dialog.get_input()
 
+
 # Grabs OpenAI api key from a file
 def get_api_key():
     with open('api_key.txt', 'a+') as key_file:  # Actually closes the file now
-        key_file.seek(0) # seeks to start of file
+        key_file.seek(0)  # seeks to start of file
         file_content = key_file.readline()
-        if file_content != "": # Basic implementation of api_key guided setup
+        if file_content != "":  # Basic implementation of api_key guided setup
             print("Successfully Read API Key")
             return file_content
         else:
@@ -86,14 +89,16 @@ def change_temperature_text(slider_value):
     temperature_string = "Temperature: {}".format(round(slider_value, 2))
     temperature_label.configure(text=temperature_string)
 
+
 # Event which occurs when the base64 checkbox is checked
 def base_64_checked():
     if base64_checkbox.get() == 1:
-        image_entry.configure(state="normal", fg_color="#202020", text_color="#338dd4") # I'll keep the state on normal instead of disabled incase you want to input a filepath
+        image_entry.configure(state="normal", fg_color="#202020", text_color="#338dd4")  # I'll keep the state on normal instead of disabled incase you want to input a filepath
         image_label.configure(text="Enter Image Filepath or Drag and Drop Image:")
     else:
-        image_entry.configure(state="normal", fg_color="#343738", text_color="#e6e6e6") #e6e6e6 is my best guess
+        image_entry.configure(state="normal", fg_color="#343738", text_color="#e6e6e6")  # e6e6e6 is my best guess
         image_label.configure(text="Enter Image URL:")
+
 
 # Calls a prompt generation and edits the gpt_textbox
 def generate_pressed():
@@ -109,12 +114,13 @@ def generate_pressed():
     gpt_textbox.insert("0.0", result)
     gpt_textbox.configure(state="disabled")
 
+
 # Event which is called when a file is drag and dropped onto the window
 def drop(event):
     files = event.data
     if files:
         files = files.split()
-        file = files[0] # gets the filepath of the first file dropped (if multiple files are dropped)
+        file = files[0]  # gets the filepath of the first file dropped (if multiple files are dropped)
         print(f"File dropped: {file}")
 
         # Sets the filepath in the image_entry URL
@@ -125,12 +131,13 @@ def drop(event):
         if base64_checkbox.get() == 0:
             base64_checkbox.select()
             base_64_checked()
+
+
 # Writes the GPT Generated Outputs to a file named output_log.txt
 def write_output():
     with open('output_log.txt', 'w') as output_file:
         for output in output_list:
             output_file.write(output + '\n')
-
 
 
 if __name__ == '__main__':
@@ -139,7 +146,7 @@ if __name__ == '__main__':
 
     # Window
     icon = "GPTVISION.ico"
-    root = TkinterDnD.Tk() # this change causes the title bar to become windows default color again (Maybe change in version 1.01)
+    root = TkinterDnD.Tk()  # this change causes the title bar to become windows default color again (Maybe change in version 1.01)
     ctk.set_appearance_mode("System")
     ctk.set_default_color_theme("blue")
     root.geometry("720x700")
@@ -194,7 +201,7 @@ if __name__ == '__main__':
     gpt_textbox = ctk.CTkTextbox(master=frame, width=680, height=300, state="disabled")
     gpt_textbox.pack(anchor="w", padx=10, pady=9)
 
-    client = openai.OpenAI(api_key=get_api_key())
+    client = OpenAI(api_key=get_api_key())
 
     root.mainloop()
 
