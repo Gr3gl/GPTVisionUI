@@ -1,7 +1,9 @@
+import os
 from openai import OpenAI
 import customtkinter as ctk
 from base64 import b64encode
 from tkinterdnd2 import DND_FILES, TkinterDnD
+
 
 # UI Globals
 global token_label
@@ -30,7 +32,6 @@ def generate_output(prompt, image_source, max_tokens, temperature):
     else:
         final_source = image_source
 
-    # TODO add checks if image link is selected, if there is a prompt
 
     response = client.chat.completions.create(
         model="gpt-4-vision-preview",
@@ -119,13 +120,13 @@ def generate_pressed():
 def drop(event):
     files = event.data
     if files:
-        files = files.split()
-        file = files[0]  # gets the filepath of the first file dropped (if multiple files are dropped)
-        print(f"File dropped: {file}")
+        # Remove {} from file (if it has a space)
+        files = str(files).replace("{", "").replace("}", "")
+        print(f"File dropped: {files}")
 
         # Sets the filepath in the image_entry URL
         image_entry.delete(0, "end")
-        image_entry.insert(0, file)
+        image_entry.insert(0, files)
 
         # Checks the base64 box if it is not checked already
         if base64_checkbox.get() == 0:
