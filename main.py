@@ -1,4 +1,3 @@
-import os
 from openai import OpenAI
 import customtkinter as ctk
 from base64 import b64encode
