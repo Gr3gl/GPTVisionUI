@@ -33,7 +33,7 @@ def generate_output(prompt, image_source, max_tokens, temperature):
 
 
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=[
             {
                 "role": "user",
